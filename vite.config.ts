@@ -1,12 +1,14 @@
+/// <reference types="vitest" />
 import { ValidateEnv } from '@julr/vite-plugin-validate-env';
 import babel from '@rolldown/plugin-babel';
-import react, { reactCompilerPreset } from '@vitejs/plugin-react';
+import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
 import checker from 'vite-plugin-checker';
 import type { VitePWAOptions } from 'vite-plugin-pwa';
 import { VitePWA } from 'vite-plugin-pwa';
-import type { PluginOption } from 'vite-plus';
-import { defineConfig, loadEnv } from 'vite-plus';
+import tsconfigPaths from 'vite-tsconfig-paths';
+import type { PluginOption } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 
 const pwaOptions: Partial<VitePWAOptions> = {
   // TODO: enable if you want to enable PWA service worker
@@ -36,18 +38,14 @@ export default defineConfig(({ mode }) => {
   const isReactCompilerEnabled = env.ENABLE_PLUGIN_REACT_COMPILER === 'true';
 
   return {
-    lint: { options: { typeAware: true, typeCheck: true } },
-    staged: {
-      'src/**/*.{js,jsx,ts,tsx,json,css,scss,md}': ['ultracite fix'],
-      '*.{ts,js,json,md}': ['ultracite fix'],
-    },
     plugins: [
+      tsconfigPaths(),
       ValidateEnv(),
       react(),
       ...(isReactCompilerEnabled
         ? [
             babel({
-              presets: [reactCompilerPreset()],
+              plugins: [['babel-plugin-react-compiler', {}]],
             }),
           ]
         : []),
@@ -64,9 +62,6 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 3000,
       open: true,
-    },
-    resolve: {
-      tsconfigPaths: true,
     },
     test: {
       coverage: {

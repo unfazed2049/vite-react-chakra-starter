@@ -1,4 +1,4 @@
-/// <reference types="vite-plus/client" />
+/// <reference types="vite/client" />
 
 type ImportMetaEnvAugmented =
   import('@julr/vite-plugin-validate-env').ImportMetaEnvAugmented<

@@ -213,7 +213,7 @@ pnpm build
 
 ### Build Configuration
 
-- **vite-plus (Rolldown)**: Experimental Vite build using Rolldown (Rust-based bundler) for faster builds.
+- **Vite**: Fast dev server and optimized builds with native Vite.
 - **vite-plugin-pwa**: PWA support (currently disabled, see `vite.config.ts`).
 
 ## Configuration Files
