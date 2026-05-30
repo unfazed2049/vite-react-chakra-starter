@@ -2,7 +2,7 @@
 
 <img src="https://og.sznm.dev/api/generate?heading=vite-react-chakra-starter&text=React+vite+template+with+Chakra-UI+and+TypeScript+setup.&template=color&center=true&height=330" />
 
-A production-ready starter template for building React applications with Vite, TypeScript, Chakra UI v3, and TanStack Router. This template provides a modern development setup with file-based routing, state management, and comprehensive tooling.
+A production-ready starter template for building React applications with Vite, TypeScript, Chakra UI v3, React Router, and Zustand. This template provides a modern development setup with component-based routing, client and server state management, and comprehensive tooling.
 
 [**Live Demo**](https://vite-react-chakra-starter.sznm.dev/)
 
@@ -14,8 +14,10 @@ A production-ready starter template for building React applications with Vite, T
 
 This template solves the problem of quickly bootstrapping a new React application with:
 - Modern build tooling (Vite with Rolldown)
-- Type-safe routing (TanStack Router)
+- Component-based routing (React Router v7)
 - Component library (Chakra UI v3)
+- Client state management (Zustand)
+- Server state management (TanStack Query)
 - Development tooling (Biome, Vitest, TypeScript)
 - PWA capabilities (optional, disabled by default)
 
@@ -23,22 +25,22 @@ This template solves the problem of quickly bootstrapping a new React applicatio
 - Backend API integration patterns
 - Authentication/authorization flows
 - Database or data persistence layer
-- Complex state management (beyond React Query)
 - Deployment pipelines (only configuration files)
 
 ## Tech Stack
 
-| Category | Technology | Version | Purpose |
-|----------|-----------|---------|---------|
-| Build Tool | Vite (Rolldown) | 7.1.20 | Fast dev server and optimized builds |
-| Framework | React | 19.2.0 | UI library |
-| Language | TypeScript | 5.9.3 | Type safety |
-| Routing | TanStack Router | 1.139.12 | File-based routing with type safety |
-| UI Library | Chakra UI | 3.30.0 | Component system |
-| State Management | TanStack Query | 5.90.11 | Server state management |
-| Testing | Vitest | 4.0.14 | Unit and integration testing |
-| Linting/Formatting | Biome | 2.3.2 | Code quality and formatting |
-| Package Manager | pnpm | 10.24.0 | Fast, disk-efficient package management |
+| Category | Technology | Purpose |
+|----------|-----------|---------|
+| Build Tool | Vite (Rolldown) | Fast dev server and optimized builds |
+| Framework | React 19 | UI library |
+| Language | TypeScript | Type safety |
+| Routing | React Router v7 | Component-based routing |
+| UI Library | Chakra UI v3 | Component system |
+| Client State | Zustand | Lightweight client state management |
+| Server State | TanStack Query | Server state management |
+| Testing | Vitest | Unit and integration testing |
+| Linting/Formatting | Biome | Code quality and formatting |
+| Package Manager | pnpm | Fast, disk-efficient package management |
 
 ## Architecture Overview
 
@@ -51,29 +53,33 @@ graph TB
     subgraph "Application Bootstrap"
         B --> C[Provider - Chakra UI Theme]
         C --> D[QueryClientProvider]
-        D --> E[RouterProvider]
+        D --> E[RouterProvider - React Router]
     end
     
     subgraph "Routing Layer"
-        E --> F[__root.tsx - Layout Wrapper]
-        F --> G[Route Tree - Auto-generated]
-        G --> H[Page Components]
+        E --> F[Layout Route]
+        F --> G[Home Page /]
+        F --> H[404 Catch-all *]
     end
     
     subgraph "Component Architecture"
         F --> I[Layout Component]
         I --> J[Header]
         I --> K[Footer]
-        I --> L[Page Content]
+        I --> L[Page Content via Outlet]
         L --> M[UI Components]
         M --> N[Chakra UI Primitives]
+    end
+    
+    subgraph "State Management"
+        Z[Zustand Store - Client State] --> L
+        Q[TanStack Query - Server State] --> L
     end
     
     subgraph "Supporting Systems"
         O[Theme System] --> C
         P[Color Mode Provider] --> C
-        Q[Query Client] --> D
-        R[Route Generation] --> G
+        S[Query Client] --> D
     end
     
     style A fill:#e1f5ff
@@ -82,6 +88,7 @@ graph TB
     style I fill:#fff4e1
     style O fill:#e8f5e9
     style P fill:#e8f5e9
+    style Z fill:#fce4ec
 ```
 
 ## Repository Structure
@@ -89,11 +96,7 @@ graph TB
 ```
 vite-react-chakra-starter/
 ├── src/
-│   ├── main.tsx                 # Application entry point
-│   ├── routes/                  # TanStack Router route definitions
-│   │   ├── __root.tsx           # Root layout route with meta tags
-│   │   └── index.tsx            # Home page route
-│   ├── routeTree.gen.ts         # Auto-generated route tree (DO NOT EDIT)
+│   ├── main.tsx                 # Application entry point (React Router setup)
 │   └── lib/                     # Application code
 │       ├── components/          # Reusable UI components
 │       │   └── ui/              # Base UI components (button, color-mode, provider)
@@ -105,6 +108,8 @@ vite-react-chakra-starter/
 │       │   └── 404/             # 404 error page
 │       ├── services/            # Services and shared constants
 │       │   └── constants.ts     # Query client instance
+│       ├── stores/              # Zustand state stores
+│       │   └── app-store.ts     # Example store with persistence
 │       ├── styles/              # Theme configuration
 │       │   └── theme/           # Chakra UI theme setup
 │       └── utils/               # Utility functions
@@ -122,14 +127,14 @@ vite-react-chakra-starter/
 
 ### Prerequisites
 
-- Node.js ^24.11.x
+- Node.js >= 22.0.0
 - pnpm 10.24.0
 
 ### Installation
 
 ```bash
 # Clone or use template
-npx degit agustinusnathaniel/vite-react-chakra-starter <app_name>
+npx degit unfazed2049/vite-react-chakra-starter <app_name>
 cd <app_name>
 
 # Install dependencies
@@ -158,10 +163,10 @@ pnpm serve
 
 ```bash
 # Check code style and linting
-pnpm biome:check
+pnpm biome:ci
 
 # Auto-fix issues
-pnpm biome:fix
+pnpm ultracite:fix
 
 # Type checking
 pnpm type:check
@@ -196,20 +201,19 @@ pnpm build
 
 ### Core Framework
 
-- **@tanstack/react-router**: File-based routing with type safety. Routes are defined in `src/routes/` and automatically generate a type-safe route tree.
+- **react-router**: Component-based routing with `createBrowserRouter` and `RouterProvider`. Routes are defined declaratively in `src/main.tsx` with nested routes, index routes, and a catch-all 404 handler.
+- **zustand**: Client state management with a minimalist hook-based API. Stores are defined in `src/lib/stores/` and support the `persist` middleware for automatic localStorage synchronization.
 - **@tanstack/react-query**: Server state management. Configured in `src/lib/services/constants.ts`.
 - **@chakra-ui/react**: Component library with design tokens. Theme configured in `src/lib/styles/theme/`.
 
 ### Development Tools
 
-- **@tanstack/router-plugin**: Vite plugin that generates route trees and enables code splitting.
-- **@tanstack/devtools-vite**: Development tools for debugging Router and Query.
 - **vite-plugin-checker**: TypeScript type checking during development (disabled in production).
 - **vite-tsconfig-paths**: Enables TypeScript path aliases (`@/*`) in Vite.
 
 ### Build Configuration
 
-- **rolldown-vite**: Experimental Vite build using Rolldown (Rust-based bundler) for faster builds.
+- **vite-plus (Rolldown)**: Experimental Vite build using Rolldown (Rust-based bundler) for faster builds.
 - **vite-plugin-pwa**: PWA support (currently disabled, see `vite.config.ts`).
 
 ## Configuration Files
@@ -217,10 +221,8 @@ pnpm build
 | File | Purpose |
 |------|---------|
 | `vite.config.ts` | Vite build configuration, plugins, dev server settings |
-| `vitest.config.ts` | Test runner configuration, coverage settings |
 | `tsconfig.json` | TypeScript compiler options, path aliases |
 | `biome.json` | Linting rules, formatting preferences, file patterns |
-| `commitlint.config.ts` | Commit message conventions (Conventional Commits) |
 | `turbo.json` | Task dependencies and caching for CI/CD |
 
 ## Path Aliases
@@ -240,35 +242,64 @@ Example: `import { Button } from '@/lib/components/ui/button'`
 
 ### Platform-Specific Configuration
 
-- **Vercel**: `vercel.json` - React Router preset configuration
-- **Netlify**: `netlify.toml` - React Router framework configuration
+- **Vercel**: `vercel.json` - Build configuration
+- **Netlify**: `netlify.toml` - SPA redirect rules, Node.js version
 - **Nixpacks**: `nixpacks.toml` - Container build configuration
-
-See platform-specific documentation:
-- [Vercel React Router Guide](https://vercel.com/docs/frameworks/react-router#vercel-react-router-preset)
-- [Netlify React Router Guide](https://docs.netlify.com/frameworks/react-router/)
 
 ## Common Development Tasks
 
 ### Adding a New Route
 
-1. Create a file in `src/routes/` (e.g., `src/routes/about.tsx`)
-2. Use `createFileRoute` to define the route
-3. The route tree is auto-generated on save
+1. Open `src/main.tsx`
+2. Add a new route object inside `createBrowserRouter([...])`
 
 ```tsx
-import { createFileRoute } from '@tanstack/react-router';
-
-export const Route = createFileRoute('/about')({
-  component: About,
-});
+{
+  path: '/about',
+  lazy: () => import('@/lib/pages/about'),
+}
 ```
+
+Or inline for simpler routes:
+
+```tsx
+{
+  path: '/about',
+  Component: () => <About />,
+}
+```
+
+> React Router v7 supports both eager and lazy-loaded routes. Use `lazy` for route-level code splitting.
 
 ### Adding a New Page Component
 
 1. Create a directory in `src/lib/pages/`
-2. Create `index.tsx` with the page component
-3. Import and use in route file
+2. Create `index.tsx` with the page component (default export recommended for lazy loading)
+
+### Adding a New Zustand Store
+
+1. Create a file in `src/lib/stores/`
+2. Define your state interface and store with Zustand's `create`
+
+```tsx
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+
+interface CounterState {
+  count: number;
+  increment: () => void;
+}
+
+export const useCounterStore = create<CounterState>()(
+  persist(
+    (set) => ({
+      count: 0,
+      increment: () => set((s) => ({ count: s.count + 1 })),
+    }),
+    { name: 'counter-storage' },
+  ),
+);
+```
 
 ### Adding a New UI Component
 
@@ -284,6 +315,7 @@ Edit `src/lib/styles/theme/index.ts` to customize Chakra UI tokens, colors, and 
 
 - [Vite Documentation](https://vitejs.dev)
 - [Chakra UI Documentation](https://chakra-ui.com/)
-- [TanStack Router Documentation](https://tanstack.com/router)
+- [React Router Documentation](https://reactrouter.com/)
+- [Zustand Documentation](https://zustand.docs.pmnd.rs/)
 - [TanStack Query Documentation](https://tanstack.com/query)
 - [TypeScript Documentation](https://www.typescriptlang.org)
