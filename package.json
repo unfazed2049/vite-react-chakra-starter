@@ -5,15 +5,12 @@
   "author": "agustinusnathaniel",
   "type": "module",
   "engines": {
-    "node": "^24.15.x"
+    "node": ">=22.0.0"
   },
   "packageManager": "pnpm@10.33.2",
-  "pnpm": {
-    "neverBuiltDependencies": [],
-    "overrides": {
-      "vite": "npm:@voidzero-dev/vite-plus-core@latest",
-      "vitest": "npm:@voidzero-dev/vite-plus-test@latest"
-    }
+  "overrides": {
+    "vite": "npm:@voidzero-dev/vite-plus-core@latest",
+    "vitest": "npm:@voidzero-dev/vite-plus-test@latest"
   },
   "scripts": {
     "dev": "vp dev",
