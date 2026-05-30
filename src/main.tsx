@@ -1,42 +1,40 @@
 import { QueryClientProvider } from '@tanstack/react-query';
-import { createRouter, RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
+import { createBrowserRouter, Outlet } from 'react-router';
+import { RouterProvider } from 'react-router/dom';
 
 import { Provider } from '@/lib/components/ui/provider';
+import { Layout } from '@/lib/layout';
 import Page404 from '@/lib/pages/404';
+import Home from '@/lib/pages/home';
 import { queryClient } from '@/lib/services/constants';
-
-// Import the generated route tree
-import { routeTree } from './routeTree.gen';
 
 // fonts
 import '@fontsource-variable/plus-jakarta-sans';
 
 // Create a new router instance
-const router = createRouter({
-  routeTree,
-  context: {
-    queryClient,
+const router = createBrowserRouter([
+  {
+    // Root layout route
+    Component: () => (
+      <Layout>
+        <Outlet />
+      </Layout>
+    ),
+    children: [
+      {
+        index: true,
+        Component: Home,
+      },
+    ],
   },
-  defaultPreload: 'intent',
-  scrollRestoration: true,
-  defaultStructuralSharing: true,
-  defaultPreloadStaleTime: 0,
-  defaultPendingComponent: () => (
-    <div className="mx-auto">
-      <p>Loading...</p>
-    </div>
-  ),
-  defaultNotFoundComponent: () => <Page404 />,
-});
-
-// Register the router instance for type safety
-declare module '@tanstack/react-router' {
-  interface Register {
-    router: typeof router;
-  }
-}
+  // 404 catch-all
+  {
+    path: '*',
+    Component: Page404,
+  },
+]);
 
 // Render the app
 const rootElement = document.getElementById('app');
