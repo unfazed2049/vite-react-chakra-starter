@@ -3,12 +3,12 @@ import { ValidateEnv } from '@julr/vite-plugin-validate-env';
 import babel from '@rolldown/plugin-babel';
 import react from '@vitejs/plugin-react';
 import { visualizer } from 'rollup-plugin-visualizer';
+import type { PluginOption } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import checker from 'vite-plugin-checker';
 import type { VitePWAOptions } from 'vite-plugin-pwa';
 import { VitePWA } from 'vite-plugin-pwa';
 import tsconfigPaths from 'vite-tsconfig-paths';
-import type { PluginOption } from 'vite';
-import { defineConfig, loadEnv } from 'vite';
 
 const pwaOptions: Partial<VitePWAOptions> = {
   // TODO: enable if you want to enable PWA service worker
